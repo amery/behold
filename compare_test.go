@@ -371,3 +371,174 @@ func TestCustomTypeComparison(t *testing.T) {
 	assert.True(t, GtFn(b, a, cmp))
 	assert.True(t, GtEqFn(a, c, cmp))
 }
+
+func TestAsLess(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected bool
+	}{
+		{"first less than second", 3, 7, true},
+		{"first equal to second", 5, 5, false},
+		{"first greater than second", 8, 4, false},
+		{"comparing with zero", 0, 1, true},
+		{"comparing negative numbers", -3, -2, true},
+		{"comparing positive and negative", -1, 1, true},
+		{"comparing large numbers", 1000000, 1000001, true},
+		{"comparing same large numbers", 1000000, 1000000, false},
+	}
+
+	lessFn := AsLess(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, lessFn(tt.a, tt.b))
+		})
+	}
+}
+
+func TestAsLessWithCustomStruct(t *testing.T) {
+	type version struct {
+		major, minor, patch int
+	}
+
+	cmp := func(a, b version) int {
+		if a.major != b.major {
+			return a.major - b.major
+		}
+		if a.minor != b.minor {
+			return a.minor - b.minor
+		}
+		return a.patch - b.patch
+	}
+
+	tests := []struct {
+		name     string
+		a, b     version
+		expected bool
+	}{
+		{"lower major version", version{1, 0, 0}, version{2, 0, 0}, true},
+		{"same major different minor", version{1, 2, 0}, version{1, 3, 0}, true},
+		{"same major and minor different patch", version{1, 2, 3}, version{1, 2, 4}, true},
+		{"identical versions", version{1, 2, 3}, version{1, 2, 3}, false},
+		{"higher version", version{2, 0, 0}, version{1, 9, 9}, false},
+	}
+
+	lessFn := AsLess(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, lessFn(tt.a, tt.b))
+		})
+	}
+}
+
+func TestAsLessPanic(t *testing.T) {
+	assert.Panics(t, func() {
+		AsLess[int](nil)
+	})
+}
+
+//revive:disable-next-line:cognitive-complexity
+func TestReverse(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"reverse less than", 5, 10, 1},
+		{"reverse greater than", 10, 5, -1},
+		{"reverse equal", 5, 5, 0},
+		{"reverse with zero", 0, 1, 1},
+		{"reverse negative numbers", -5, -3, 1},
+		{"reverse mixed signs", -1, 1, 1},
+	}
+
+	reversedCmp := Reverse(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, reversedCmp(tt.a, tt.b))
+		})
+	}
+
+	// Test with custom type
+	type score struct {
+		value float64
+	}
+	scoreCmp := func(a, b score) int {
+		if a.value < b.value {
+			return -1
+		}
+		if a.value > b.value {
+			return 1
+		}
+		return 0
+	}
+
+	reversedScoreCmp := Reverse(scoreCmp)
+	s1 := score{3.14}
+	s2 := score{2.71}
+
+	assert.Equal(t, -1, reversedScoreCmp(s1, s2))
+	assert.Equal(t, 1, reversedScoreCmp(s2, s1))
+	assert.Equal(t, 0, reversedScoreCmp(s1, s1))
+}
+
+func TestReversePanic(t *testing.T) {
+	assert.Panics(t, func() {
+		Reverse[int](nil)
+	})
+}
+
+func TestReverseChained(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	// Test double reverse returns to original ordering
+	doubleReversed := Reverse(Reverse(cmp))
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"double reverse less than", 5, 10, -1},
+		{"double reverse greater than", 10, 5, 1},
+		{"double reverse equal", 5, 5, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, doubleReversed(tt.a, tt.b))
+			assert.Equal(t, tt.expected, cmp(tt.a, tt.b))
+		})
+	}
+}
