@@ -448,3 +448,97 @@ func TestAsLessPanic(t *testing.T) {
 		AsLess[int](nil)
 	})
 }
+
+//revive:disable-next-line:cognitive-complexity
+func TestReverse(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"reverse less than", 5, 10, 1},
+		{"reverse greater than", 10, 5, -1},
+		{"reverse equal", 5, 5, 0},
+		{"reverse with zero", 0, 1, 1},
+		{"reverse negative numbers", -5, -3, 1},
+		{"reverse mixed signs", -1, 1, 1},
+	}
+
+	reversedCmp := Reverse(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, reversedCmp(tt.a, tt.b))
+		})
+	}
+
+	// Test with custom type
+	type score struct {
+		value float64
+	}
+	scoreCmp := func(a, b score) int {
+		if a.value < b.value {
+			return -1
+		}
+		if a.value > b.value {
+			return 1
+		}
+		return 0
+	}
+
+	reversedScoreCmp := Reverse(scoreCmp)
+	s1 := score{3.14}
+	s2 := score{2.71}
+
+	assert.Equal(t, -1, reversedScoreCmp(s1, s2))
+	assert.Equal(t, 1, reversedScoreCmp(s2, s1))
+	assert.Equal(t, 0, reversedScoreCmp(s1, s1))
+}
+
+func TestReversePanic(t *testing.T) {
+	assert.Panics(t, func() {
+		Reverse[int](nil)
+	})
+}
+
+func TestReverseChained(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	// Test double reverse returns to original ordering
+	doubleReversed := Reverse(Reverse(cmp))
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"double reverse less than", 5, 10, -1},
+		{"double reverse greater than", 10, 5, 1},
+		{"double reverse equal", 5, 5, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, doubleReversed(tt.a, tt.b))
+			assert.Equal(t, tt.expected, cmp(tt.a, tt.b))
+		})
+	}
+}
