@@ -9,6 +9,19 @@ import "darvaza.org/core"
 // - Positive value if a > b
 type CompFunc[T any] func(a, b T) int
 
+// AsLess converts a CompFunc into a less-than comparison function.
+// It returns a function that returns true if the first argument is less than the second argument.
+// It panics if the provided comparison function is nil.
+func AsLess[T any](cmp CompFunc[T]) func(a, b T) bool {
+	if cmp == nil {
+		panic(newNilCompFuncErr())
+	}
+
+	return func(a, b T) bool {
+		return cmp(a, b) < 0
+	}
+}
+
 // Eq returns true if a is equal to b for comparable types.
 func Eq[T comparable](a, b T) bool {
 	return a == b

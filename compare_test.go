@@ -371,3 +371,80 @@ func TestCustomTypeComparison(t *testing.T) {
 	assert.True(t, GtFn(b, a, cmp))
 	assert.True(t, GtEqFn(a, c, cmp))
 }
+
+func TestAsLess(t *testing.T) {
+	cmp := func(a, b int) int {
+		if a < b {
+			return -1
+		}
+		if a > b {
+			return 1
+		}
+		return 0
+	}
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected bool
+	}{
+		{"first less than second", 3, 7, true},
+		{"first equal to second", 5, 5, false},
+		{"first greater than second", 8, 4, false},
+		{"comparing with zero", 0, 1, true},
+		{"comparing negative numbers", -3, -2, true},
+		{"comparing positive and negative", -1, 1, true},
+		{"comparing large numbers", 1000000, 1000001, true},
+		{"comparing same large numbers", 1000000, 1000000, false},
+	}
+
+	lessFn := AsLess(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, lessFn(tt.a, tt.b))
+		})
+	}
+}
+
+func TestAsLessWithCustomStruct(t *testing.T) {
+	type version struct {
+		major, minor, patch int
+	}
+
+	cmp := func(a, b version) int {
+		if a.major != b.major {
+			return a.major - b.major
+		}
+		if a.minor != b.minor {
+			return a.minor - b.minor
+		}
+		return a.patch - b.patch
+	}
+
+	tests := []struct {
+		name     string
+		a, b     version
+		expected bool
+	}{
+		{"lower major version", version{1, 0, 0}, version{2, 0, 0}, true},
+		{"same major different minor", version{1, 2, 0}, version{1, 3, 0}, true},
+		{"same major and minor different patch", version{1, 2, 3}, version{1, 2, 4}, true},
+		{"identical versions", version{1, 2, 3}, version{1, 2, 3}, false},
+		{"higher version", version{2, 0, 0}, version{1, 9, 9}, false},
+	}
+
+	lessFn := AsLess(cmp)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, lessFn(tt.a, tt.b))
+		})
+	}
+}
+
+func TestAsLessPanic(t *testing.T) {
+	assert.Panics(t, func() {
+		AsLess[int](nil)
+	})
+}
