@@ -1,9 +1,14 @@
 # behold
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/amery/behold.svg)](https://pkg.go.dev/github.com/amery/behold)
-[![Go Report Card](https://goreportcard.com/badge/github.com/amery/behold)](https://goreportcard.com/report/github.com/amery/behold)
+[![Go Reference][godoc_badge]][godoc_link]
+[![Go Report Card][goreportcard_badge]][goreportcard_link]
 
 `behold` is a generic key-value store with versioning and transactional capabilities. It's designed to offer a flexible interface for managing data with type safety using Go's generics.
+
+[godoc_badge]: https://pkg.go.dev/badge/github.com/amery/behold.svg
+[godoc_link]: https://pkg.go.dev/github.com/amery/behold
+[goreportcard_badge]: https://goreportcard.com/badge/github.com/amery/behold
+[goreportcard_link]: https://goreportcard.com/report/github.com/amery/behold
 
 ## Overview
 
@@ -177,12 +182,17 @@ func main() {
 
 ## See others
 
-- [`darvaza.org/core`](https://darvaza.org/core) - A collection of utility packages for Go.
-- [`darvaza.org/cache`](https://darvaza.org/cache) - A generic cache interface and implementations following
+- [`darvaza.org/core`][darvaza_core] - A collection of utility packages for Go.
+- [`darvaza.org/cache`][darvaza_cache] - A generic cache interface and implementations following
 similar principles as this package.
-- [`github.com/timshannon/bolthold`](https://github.com/timshannon/bolthold) - A low-level key-value store for Go,
+- [`github.com/timshannon/bolthold`][bolthold] - A low-level key-value store for Go,
 built on BoltDB, that inspired this package.
-- [`github.com/timshannon/badgerhold`](https://github.com/timshannon/badgerhold) - BadgerDB based sibling of `bolthold`, offering
+- [`github.com/timshannon/badgerhold`][badgerhold] - BadgerDB based sibling of [`bolthold`][bolthold], offering
+
+[darvaza_core]: https://pkg.go.dev/darvaza.org/core
+[darvaza_cache]: https://pkg.go.dev/darvaza.org/cache
+[bolthold]: https://pkg.go.dev/github.com/timshannon/bolthold
+[badgerhold]: https://pkg.go.dev/github.com/timshannon/badgerhold
 
 ## License
 
