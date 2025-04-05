@@ -26,6 +26,19 @@ func AsLess[T any](cmp CompFunc[T]) CondFunc[T] {
 	}
 }
 
+// AsEqual converts a CompFunc into an equality condition function.
+// It returns a function that returns true if the first argument is equal to the second argument.
+// It panics if the provided comparison function is nil.
+func AsEqual[T any](cmp CompFunc[T]) CondFunc[T] {
+	if cmp == nil {
+		panic(newNilCompFuncErr())
+	}
+
+	return func(a, b T) bool {
+		return cmp(a, b) == 0
+	}
+}
+
 // Reverse returns a new CompFunc that inverts the comparison result of the given CompFunc.
 // It returns a function that negates the original comparison, effectively reversing the order.
 // It panics if the provided comparison function is nil.
