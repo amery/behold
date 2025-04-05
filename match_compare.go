@@ -177,3 +177,16 @@ func MatchLtEqFn[T core.Ordered](v T, cmp CompFunc[T]) Matcher[T] {
 		return LtEqFn(v0, v, cmp)
 	})
 }
+
+// MatchLtEqFn2 creates a Matcher that checks if a value is less than or equal to the given value
+// using a custom condition function. It returns a function that returns true if the input
+// is less than or equal to the specified value according to the provided condition function.
+// Panics if the condition function is nil.
+func MatchLtEqFn2[T any](v T, less CondFunc[T]) Matcher[T] {
+	if less == nil {
+		panic(newNilCondFuncErr())
+	}
+	return MatchFunc[T](func(v0 T) bool {
+		return LtEqFn2(v0, v, less)
+	})
+}
