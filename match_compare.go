@@ -2,24 +2,6 @@ package behold
 
 import "darvaza.org/core"
 
-// ComposeMatch creates a new Matcher by applying an accessor function to transform input values
-// before matching against an existing matcher. It allows composing matchers on different types
-// by first extracting a specific field or transforming the input. Panics if the accessor
-// function or the base query is nil.
-func ComposeMatch[T any, V any](fn func(T) V, match Matcher[V]) Matcher[T] {
-	if fn == nil {
-		panic(core.NewPanicError(1, "nil accessor function"))
-	}
-
-	if match == nil {
-		panic(core.NewPanicError(1, "no match condition"))
-	}
-
-	return MatchFunc[T](func(x T) bool {
-		return match.Match(fn(x))
-	})
-}
-
 // MatchEq creates a Matcher that checks for equality with the given value.
 // It returns a function that returns true if the input is equal to the specified value.
 func MatchEq[T comparable](v T) Matcher[T] {
