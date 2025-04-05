@@ -26,9 +26,9 @@ func personName(p testPerson) string {
 	return p.Name
 }
 
-func TestQueryFunc(t *testing.T) {
-	isAdult := ComposeQuery(personAge, GtEqQuery(18))
-	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
+func TestMatchFunc(t *testing.T) {
+	isAdult := ComposeMatch(personAge, MatchGt(18))
+	isNamedJohn := ComposeMatch(personName, MatchEq(nameJohn))
 
 	adult := testPerson{Name: nameAlice, Age: 30}
 	child := testPerson{Name: nameBob, Age: 10}
@@ -51,15 +51,15 @@ func TestQueryFunc(t *testing.T) {
 	}
 
 	// Test nil function behavior
-	var nilFunc QueryFunc[testPerson]
+	var nilFunc MatchFunc[testPerson]
 	if !nilFunc.Match(adult) {
 		t.Error("Nil function should match everything")
 	}
 }
 
 func TestMatchAny(t *testing.T) {
-	isAdult := ComposeQuery(personAge, GtEqQuery(18))
-	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
+	isAdult := ComposeMatch(personAge, MatchGt(18))
+	isNamedJohn := ComposeMatch(personName, MatchEq(nameJohn))
 
 	// Test with queries
 	anyQuery := MatchAny(isAdult, isNamedJohn)
@@ -87,7 +87,7 @@ func TestMatchAny(t *testing.T) {
 	}
 
 	// Test with nil queries
-	var nilQuery Query[testPerson]
+	var nilQuery Matcher[testPerson]
 	anyWithNil := MatchAny(isAdult, nilQuery, isNamedJohn)
 
 	if !anyWithNil.Match(adult) {
@@ -101,8 +101,8 @@ func TestMatchAny(t *testing.T) {
 
 //revive:disable-next-line:cognitive-complexity
 func TestMatchAll(t *testing.T) {
-	isAdult := ComposeQuery(personAge, GtEqQuery(18))
-	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
+	isAdult := ComposeMatch(personAge, MatchGt(18))
+	isNamedJohn := ComposeMatch(personName, MatchEq(nameJohn))
 
 	// Test with queries
 	allQuery := MatchAll(isAdult, isNamedJohn)
@@ -135,7 +135,7 @@ func TestMatchAll(t *testing.T) {
 	}
 
 	// Test with nil queries
-	var nilQuery Query[testPerson]
+	var nilQuery Matcher[testPerson]
 	allWithNil := MatchAll(isAdult, nilQuery, isNamedJohn)
 
 	if allWithNil.Match(adult) {
@@ -153,11 +153,11 @@ func TestMatchAll(t *testing.T) {
 
 //revive:disable-next-line:cognitive-complexity
 //revive:disable-next-line:cyclomatic
-func TestQueryComposition(t *testing.T) {
-	isAdult := ComposeQuery(personAge, GtEqQuery(18))
+func TestMatcherComposition(t *testing.T) {
+	isAdult := ComposeMatch(personAge, MatchGt(18))
 
-	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
-	isNamedBob := ComposeQuery(personName, EqQuery(nameBob))
+	isNamedJohn := ComposeMatch(personName, MatchEq(nameJohn))
+	isNamedBob := ComposeMatch(personName, MatchEq(nameBob))
 
 	// Test AND composition
 	adultNamedJohn := isAdult.And(isNamedJohn)
@@ -225,8 +225,8 @@ func TestQueryComposition(t *testing.T) {
 func TestAndsAndOrs(t *testing.T) {
 	// Test ands type
 	a := ands[testPerson]{
-		QueryFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
-		QueryFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn }),
+		MatchFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
+		MatchFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn }),
 	}
 
 	john := testPerson{Name: nameJohn, Age: 25}
@@ -242,8 +242,8 @@ func TestAndsAndOrs(t *testing.T) {
 
 	// Test ors type
 	o := ors[testPerson]{
-		QueryFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
-		QueryFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn }),
+		MatchFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
+		MatchFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn }),
 	}
 
 	if !o.Match(john) {
@@ -257,7 +257,7 @@ func TestAndsAndOrs(t *testing.T) {
 	// Test with nil values in the slice
 	andsWithNil := ands[testPerson]{
 		nil,
-		QueryFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
+		MatchFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 }),
 	}
 
 	adult := testPerson{Name: nameAlice, Age: 30}
@@ -285,20 +285,20 @@ func TestAndsAndOrs(t *testing.T) {
 }
 
 func TestQJoin(t *testing.T) {
-	q1 := QueryFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 })
-	q2 := QueryFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn })
-	q3 := QueryFunc[testPerson](func(p testPerson) bool { return p.Name == nameBob })
+	q1 := MatchFunc[testPerson](func(p testPerson) bool { return p.Age >= 18 })
+	q2 := MatchFunc[testPerson](func(p testPerson) bool { return p.Name == nameJohn })
+	q3 := MatchFunc[testPerson](func(p testPerson) bool { return p.Name == nameBob })
 
 	// Test with non-nil first query
-	result := qJoin(q1, []Query[testPerson]{q2, q3})
+	result := qJoin(q1, []Matcher[testPerson]{q2, q3})
 
 	if len(result) != 3 {
 		t.Errorf("Expected length 3, got %d", len(result))
 	}
 
 	// Test with nil first query
-	var nilQuery Query[testPerson]
-	result = qJoin(nilQuery, []Query[testPerson]{q2, q3})
+	var nilQuery Matcher[testPerson]
+	result = qJoin(nilQuery, []Matcher[testPerson]{q2, q3})
 
 	if len(result) != 2 {
 		t.Errorf("Expected length 2, got %d", len(result))

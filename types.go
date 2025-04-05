@@ -52,7 +52,7 @@ type Tx[K comparable, V any] interface {
 	// The provided function is called for entries matching any of the queries,
 	// or for every entry if no queries are provided.
 	// Iteration can be ended early by returning false from the callback.
-	ForEach(fn func(key K, value V) bool, ors ...Query[any]) error
+	ForEach(fn func(key K, value V) bool, ors ...Matcher[any]) error
 
 	// Get retrieves a value by key
 	Get(key K) (value V, err error)
