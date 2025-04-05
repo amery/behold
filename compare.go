@@ -66,6 +66,15 @@ func EqFn[T any](a, b T, cmp CompFunc[T]) bool {
 	return cmp(a, b) == 0
 }
 
+// EqFn2 returns true if a is equal to b using a custom equality function.
+// It panics if the provided equality function is nil.
+func EqFn2[T any](a, b T, eq CondFunc[T]) bool {
+	if eq == nil {
+		panic(newNilCondFuncErr())
+	}
+	return eq(a, b)
+}
+
 // NotEq returns true if a is not equal to b for comparable types.
 func NotEq[T comparable](a, b T) bool {
 	return a != b
@@ -78,6 +87,15 @@ func NotEqFn[T any](a, b T, cmp CompFunc[T]) bool {
 		panic(newNilCompFuncErr())
 	}
 	return cmp(a, b) != 0
+}
+
+// NotEqFn2 returns true if a is not equal to b using a custom equality function.
+// It panics if the provided equality function is nil.
+func NotEqFn2[T any](a, b T, eq CondFunc[T]) bool {
+	if eq == nil {
+		panic(newNilCondFuncErr())
+	}
+	return !eq(a, b)
 }
 
 // Gt returns true if a is greater than b for ordered types.
@@ -138,4 +156,8 @@ func LtEqFn[T any](a, b T, cmp CompFunc[T]) bool {
 
 func newNilCompFuncErr() error {
 	return core.NewPanicError(2, "nil comparison function")
+}
+
+func newNilCondFuncErr() error {
+	return core.NewPanicError(2, "nil condition function")
 }
