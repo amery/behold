@@ -542,3 +542,63 @@ func TestReverseChained(t *testing.T) {
 		})
 	}
 }
+
+func TestLtEqFn2(t *testing.T) {
+	less := func(a, b int) bool {
+		return a < b
+	}
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected bool
+	}{
+		{"less with positive numbers", 3, 5, true},
+		{"equal with positive numbers", 5, 5, true},
+		{"greater with positive numbers", 7, 5, false},
+		{"less with negative numbers", -7, -5, true},
+		{"equal with negative numbers", -5, -5, true},
+		{"greater with negative numbers", -3, -5, false},
+		{"less with mixed signs", -5, 3, true},
+		{"comparing with zero", 0, 1, true},
+		{"zero equality", 0, 0, true},
+		{"large number comparison", 1000000, 1000001, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, LtEqFn2(tt.a, tt.b, less))
+		})
+	}
+
+	// Test with custom type
+	type temperature struct {
+		celsius float64
+	}
+	tempLess := func(a, b temperature) bool {
+		return a.celsius < b.celsius
+	}
+
+	tempTests := []struct {
+		name     string
+		a, b     temperature
+		expected bool
+	}{
+		{"freezing point comparison", temperature{0}, temperature{0}, true},
+		{"below freezing", temperature{-5.5}, temperature{-2.2}, true},
+		{"above freezing", temperature{25.5}, temperature{30.2}, true},
+		{"high temperature", temperature{100}, temperature{90}, false},
+	}
+
+	for _, tt := range tempTests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, LtEqFn2(tt.a, tt.b, tempLess))
+		})
+	}
+}
+
+func TestLtEqFn2Panic(t *testing.T) {
+	assert.Panics(t, func() {
+		LtEqFn2(1, 2, nil)
+	})
+}

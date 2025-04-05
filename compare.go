@@ -173,6 +173,15 @@ func LtEqFn[T any](a, b T, cmp CompFunc[T]) bool {
 	return cmp(a, b) <= 0
 }
 
+// LtEqFn2 returns true if a is less than or equal to b using a custom less-than condition function.
+// It panics if the provided less-than condition function is nil.
+func LtEqFn2[T any](a, b T, less CondFunc[T]) bool {
+	if less == nil {
+		panic(newNilCondFuncErr())
+	}
+	return !less(b, a)
+}
+
 func newNilCompFuncErr() error {
 	return core.NewPanicError(2, "nil comparison function")
 }
