@@ -9,10 +9,14 @@ import "darvaza.org/core"
 // - Positive value if a > b
 type CompFunc[T any] func(a, b T) int
 
-// AsLess converts a CompFunc into a less-than comparison function.
+// CondFunc is a generic condition function that takes two values of type T and returns a boolean.
+// The return value indicates whether the condition is true or false for the given pair of values.
+type CondFunc[T any] func(a, b T) bool
+
+// AsLess converts a CompFunc into a less-than condition function.
 // It returns a function that returns true if the first argument is less than the second argument.
 // It panics if the provided comparison function is nil.
-func AsLess[T any](cmp CompFunc[T]) func(a, b T) bool {
+func AsLess[T any](cmp CompFunc[T]) CondFunc[T] {
 	if cmp == nil {
 		panic(newNilCompFuncErr())
 	}
