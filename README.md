@@ -158,12 +158,7 @@ func main() {
     }
     
     // Create a query that matches values greater than 1
-    query := behold.QueryFunc[any](func(v any) bool {
-        if val, ok := v.(int); ok {
-            return behold.Gt(val, 1)
-        }
-        return false
-    })
+    query := behold.GtQuery(1)
     
     // Read data in a read-only transaction
     err = store.View(context.Background(), func(tx behold.Tx[string, int]) error {

@@ -17,15 +17,18 @@ type testPerson struct {
 	Age  int
 }
 
-func TestQueryFunc(t *testing.T) {
-	// Test basic matching
-	isAdult := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Age >= 18
-	})
+// Field accessor functions for testPerson
+func personAge(p testPerson) int {
+	return p.Age
+}
 
-	isNamedJohn := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Name == nameJohn
-	})
+func personName(p testPerson) string {
+	return p.Name
+}
+
+func TestQueryFunc(t *testing.T) {
+	isAdult := ComposeQuery(personAge, GtEqQuery(18))
+	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
 
 	adult := testPerson{Name: nameAlice, Age: 30}
 	child := testPerson{Name: nameBob, Age: 10}
@@ -55,13 +58,8 @@ func TestQueryFunc(t *testing.T) {
 }
 
 func TestMatchAny(t *testing.T) {
-	isAdult := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Age >= 18
-	})
-
-	isNamedJohn := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Name == nameJohn
-	})
+	isAdult := ComposeQuery(personAge, GtEqQuery(18))
+	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
 
 	// Test with queries
 	anyQuery := MatchAny(isAdult, isNamedJohn)
@@ -103,13 +101,8 @@ func TestMatchAny(t *testing.T) {
 
 //revive:disable-next-line:cognitive-complexity
 func TestMatchAll(t *testing.T) {
-	isAdult := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Age >= 18
-	})
-
-	isNamedJohn := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Name == nameJohn
-	})
+	isAdult := ComposeQuery(personAge, GtEqQuery(18))
+	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
 
 	// Test with queries
 	allQuery := MatchAll(isAdult, isNamedJohn)
@@ -161,17 +154,10 @@ func TestMatchAll(t *testing.T) {
 //revive:disable-next-line:cognitive-complexity
 //revive:disable-next-line:cyclomatic
 func TestQueryComposition(t *testing.T) {
-	isAdult := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Age >= 18
-	})
+	isAdult := ComposeQuery(personAge, GtEqQuery(18))
 
-	isNamedJohn := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Name == nameJohn
-	})
-
-	isNamedBob := QueryFunc[testPerson](func(p testPerson) bool {
-		return p.Name == nameBob
-	})
+	isNamedJohn := ComposeQuery(personName, EqQuery(nameJohn))
+	isNamedBob := ComposeQuery(personName, EqQuery(nameBob))
 
 	// Test AND composition
 	adultNamedJohn := isAdult.And(isNamedJohn)
