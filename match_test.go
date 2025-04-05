@@ -18,12 +18,12 @@ type testPerson struct {
 }
 
 // Field accessor functions for testPerson
-func personAge(p testPerson) int {
-	return p.Age
+func personAge(p testPerson) (int, bool) {
+	return p.Age, true
 }
 
-func personName(p testPerson) string {
-	return p.Name
+func personName(p testPerson) (string, bool) {
+	return p.Name, true
 }
 
 func TestMatchFunc(t *testing.T) {
