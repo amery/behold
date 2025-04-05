@@ -17,7 +17,7 @@ The `behold` package provides:
 - Generic key-value storage with strong type safety
 - Transaction support for both read-only and read-write operations
 - Built-in versioning of data
-- Comprehensive query and filtering capabilities
+- Comprehensive matching capabilities
 - Flexible synchronization mechanisms
 
 ## Installation
@@ -36,13 +36,13 @@ The package uses Go generics to provide a type-safe key-value store interface th
 
 `behold` offers both read-only (`View`) and read-write (`Update`) transactions, with optional mutex locking for concurrent access control.
 
-### Query System
+### Matching System
 
-A powerful query system allows filtering data with logical operations:
+A powerful matching system allows filtering data with logical operations:
 
 - Combine predicates with `AND` and `OR` operations
 - Match values against complex conditions
-- Create custom query functions for specific filtering needs
+- Create custom matching functions for specific filtering needs
 
 ### Comparison Utilities
 
@@ -73,7 +73,7 @@ type Tx[K comparable, V any] interface {
     Context() context.Context
     Version() uint64
     Now() time.Time
-    ForEach(fn func(key K, value V) bool, ors ...Query[any]) error
+    ForEach(fn func(key K, value V) bool, ors ...Matcher[any]) error
     Get(key K) (value V, err error)
     Set(key K, value V) error
     Append(key K, value V) error
@@ -85,12 +85,12 @@ type Tx[K comparable, V any] interface {
 
 Interface for operations within a transaction context.
 
-#### Query
+#### Matcher
 
 ```go
-type Query[T any] interface {
-    And(...Query[T]) Query[T]
-    Or(...Query[T]) Query[T]
+type Matcher[T any] interface {
+    And(...Matcher[T]) Matcher[T]
+    Or(...Matcher[T]) Matcher[T]
     Match(T) bool
 }
 ```
@@ -157,16 +157,13 @@ func main() {
         log.Fatalf("Failed to update: %v", err)
     }
     
-    // Create a query that matches values greater than 1
-    query := behold.GtQuery(1)
-    
     // Read data in a read-only transaction
     err = store.View(context.Background(), func(tx behold.Tx[string, int]) error {
         // Print all key-value pairs where value > 1
         return tx.ForEach(func(key string, value int) bool {
             fmt.Printf("%s: %d\n", key, value)
             return true // continue iteration
-        }, query)
+        }, behold.MatchGt(1))
     })
     
     if err != nil {
