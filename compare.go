@@ -126,6 +126,16 @@ func GtEqFn[T any](a, b T, cmp CompFunc[T]) bool {
 	return cmp(a, b) >= 0
 }
 
+// GtEqFn2 returns true if a is greater than or equal to b using a custom less-than condition function.
+// It panics if the provided less-than condition function is nil.
+func GtEqFn2[T any](a, b T, less CondFunc[T]) bool {
+	if less == nil {
+		panic(newNilCondFuncErr())
+	}
+
+	return !less(a, b)
+}
+
 // Lt returns true if a is less than b for ordered types.
 func Lt[T core.Ordered](a, b T) bool {
 	return a < b
@@ -138,6 +148,15 @@ func LtFn[T any](a, b T, cmp CompFunc[T]) bool {
 		panic(newNilCompFuncErr())
 	}
 	return cmp(a, b) < 0
+}
+
+// LtFn2 returns true if a is less than b using a custom less-than condition function.
+// It panics if the provided less-than condition function is nil.
+func LtFn2[T any](a, b T, less CondFunc[T]) bool {
+	if less == nil {
+		panic(newNilCondFuncErr())
+	}
+	return less(a, b)
 }
 
 // LtEq returns true if a is less than or equal to b for ordered types.
