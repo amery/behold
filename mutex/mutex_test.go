@@ -9,7 +9,7 @@ import (
 )
 
 func doSomething() {
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 }
 
 // TestROMutex tests the read-only mutex adapter functionality

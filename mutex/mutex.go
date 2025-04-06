@@ -2,7 +2,6 @@
 package mutex
 
 import (
-	"errors"
 	"sync"
 
 	"darvaza.org/core"
@@ -114,7 +113,7 @@ func TryLock(locks ...Mutex) bool {
 //revive:disable-next-line:cognitive-complexity
 func doTryLock(readOnly bool, locks []Mutex) (bool, error) {
 	if len(locks) == 0 {
-		return false, errors.New("cannot lock on nothing")
+		return true, nil
 	}
 
 	var i int
