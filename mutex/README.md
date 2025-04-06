@@ -127,6 +127,8 @@ func readOnlyExample() {
 }
 ```
 
+> **Important Note**: When using custom RWMutex implementations with ROMutex, the behavior may differ from standard library mutexes. Custom implementations can impose additional constraints or provide enhanced capabilities that affect what operations are possible on the protected data. Unlike standard library mutexes which only manage concurrency, custom implementations might implement domain-specific access control or validation, so the "read-only" nature is defined by the implementation rather than being a universally consistent guarantee. Be cautious when using ROMutex with custom mutex implementations and don't rely solely on type constraints for security or data integrity.
+
 ## Compatibility
 
 This package works with standard library types like `sync.Mutex` and `sync.RWMutex` which implement the interfaces defined here.

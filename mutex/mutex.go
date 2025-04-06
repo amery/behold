@@ -55,6 +55,15 @@ type RWMutex interface {
 // RWMutex's RLock/RUnlock/TryRLock methods respectively. This is useful when you want
 // to restrict access to read-only operations for certain code paths while maintaining
 // the Mutex interface contract.
+//
+// Note that when using custom RWMutex implementations, the behavior may differ from
+// standard library mutexes. Custom implementations can impose additional constraints
+// or provide enhanced capabilities that affect what operations are possible on the
+// protected data. Unlike standard library mutexes which only manage concurrency,
+// custom implementations might implement domain-specific access control or validation,
+// so the "read-only" nature is defined by the implementation rather than being
+// a universally consistent guarantee.
+//
 // Example usage:
 //
 //	var rwm sync.RWMutex
