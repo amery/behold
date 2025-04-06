@@ -1,4 +1,5 @@
-package behold
+// Package mutex provides interfaces and utilities for mutual exclusion and read-write locking mechanisms
+package mutex
 
 import "sync"
 

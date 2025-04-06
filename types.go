@@ -3,6 +3,8 @@ package behold
 import (
 	"context"
 	"time"
+
+	"github.com/amery/behold/mutex"
 )
 
 // Store represents a generic key-value store with versioning and transaction support.
@@ -21,12 +23,12 @@ type Store[K comparable, V any] interface {
 	// View executes a read-only transaction with optional mutex locks
 	// The provided function will be called with a transaction object that
 	// can be used to access data in the store
-	View(ctx context.Context, fn func(Tx[K, V]) error, locks ...Mutex) error
+	View(ctx context.Context, fn func(Tx[K, V]) error, locks ...mutex.Mutex) error
 
 	// Update executes a read-write transaction with optional mutex locks
 	// The provided function will be called with a transaction object that
 	// can be used to access and modify data in the store
-	Update(ctx context.Context, fn func(Tx[K, V]) error, locks ...Mutex) error
+	Update(ctx context.Context, fn func(Tx[K, V]) error, locks ...mutex.Mutex) error
 
 	// Close closes the store and releases its resources
 	Close() error
