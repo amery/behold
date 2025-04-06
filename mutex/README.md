@@ -12,6 +12,7 @@ This package defines standardized interfaces for mutex operations and utilities 
 - Utilities for read-only mutexes
 - Functions for operating on multiple locks simultaneously
 - Safe lock/unlock operations with proper error handling
+- Collections of mutexes that can be operated on as a group
 
 ## Interfaces
 
@@ -74,6 +75,41 @@ type RWMutex interface {
 
 - `ROMutex(m RWMutex) Mutex`: Converts an RWMutex to a read-only Mutex
 
+## Collections
+
+### Mutexes
+
+`Mutexes` is a slice-based collection of `Mutex` objects that can be locked and unlocked together:
+
+```go
+type Mutexes []Mutex
+```
+
+It implements the `Mutex` interface, allowing a collection of mutexes to be treated as a single mutex:
+
+- `Lock()`: Acquires all locks in the collection in a deadlock-safe way
+- `Unlock()`: Releases all locks in the collection
+- `TryLock() bool`: Attempts to acquire all locks without blocking, returning true only if all locks were acquired
+
+### RWMutexes
+
+`RWMutexes` is a slice-based collection of `RWMutex` objects that can be locked and unlocked together:
+
+```go
+type RWMutexes []RWMutex
+```
+
+It implements the `RWMutex` interface, providing both exclusive and shared locking operations on the collection:
+
+- `Lock()`: Acquires exclusive locks on all mutexes in the collection
+- `Unlock()`: Releases exclusive locks on all mutexes in the collection
+- `TryLock() bool`: Attempts to acquire exclusive locks without blocking
+- `RLock()`: Acquires shared (read) locks on all mutexes in the collection
+- `RUnlock()`: Releases shared (read) locks on all mutexes in the collection
+- `TryRLock() bool`: Attempts to acquire shared locks without blocking
+
+Both collections ensure interface compliance with the `Mutex`, `RWMutex`, and `sync.Locker` interfaces.
+
 ## Examples
 
 ### Basic Usage
@@ -108,6 +144,28 @@ func multiLockExample(mu1, mu2, mu3 mutex.Mutex) {
     mutex.Lock(mu1, mu2, mu3)
     // Critical section with all locks held
     mutex.Unlock(mu3, mu2, mu1) // Can release in any order
+}
+```
+
+### Using Mutex Collections
+
+```go
+func mutexCollectionExample() {
+    // Create a collection of mutexes
+    locks := mutex.Mutexes{&sync.Mutex{}, &sync.Mutex{}, &sync.Mutex{}}
+    
+    // Lock all mutexes in the collection at once
+    locks.Lock()
+    // Critical section with all locks held
+    locks.Unlock()
+    
+    // Create a collection of RW mutexes
+    rwlocks := mutex.RWMutexes{&sync.RWMutex{}, &sync.RWMutex{}}
+    
+    // Acquire read locks on all mutexes
+    rwlocks.RLock()
+    // Read operations
+    rwlocks.RUnlock()
 }
 ```
 
